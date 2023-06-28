@@ -1,11 +1,9 @@
 from random_word import RandomWords
-
 from colorama import Fore, Style
 
 # def hangman_game():
+scaffold = ['''
 
-# Hangman pics
-HANGMANPICS = ['''
   +---+
   |   |
       |
@@ -27,6 +25,7 @@ HANGMANPICS = ['''
       |
       |
 =========''', '''
+
   +---+
   |   |
   O   |
@@ -48,6 +47,7 @@ HANGMANPICS = ['''
  /    |
       |
 =========''', '''
+
   +---+
   |   |
   O   |
@@ -56,53 +56,68 @@ HANGMANPICS = ['''
       |
 =========''']
 
-
 # Pick a random word
 r = RandomWords()
 word = r.get_random_word()
-print(word)
+
+# Display word and length for debug purpose
+# print(word, len(word))
 
 # Welcome
-print('Guess the word: '+'_ '*len(word))
 
-
-# Get a guess form user, a single character
-guess = ''
+# Initialize letter guess list and guess variable
+letters_guessed = []
+incorrect_list = []
 incorrect_guesses = 0
-max_incorrect_guessess = 6
+max_incorrect_guessess = 5
+display_word = '_' * len(word)
+
+# print(word)
 
 while True:
-    letters_guessed = [ ]
+    # Print word with hidden letters
+    print('Guess the word:', display_word)
     guess = input("Enter a letter: ")
-    if guess in word and len(guess) == 1 and max_incorrect_guessess != 0:
-        print(f'Your guess was: {guess}')
-        print('Good guess!')
+    # Take care of already guessed letters
+    if guess in letters_guessed:
+        print(Fore.RED + 'Oops! You already guessed this letter. Enter a new letter to continue.')
+        print(Style.RESET_ALL)
+    elif guess in incorrect_list:
+        print(Fore.RED + 'Oops! You already guessed this letter. Enter a new letter to continue.')
+        print(Style.RESET_ALL)
+    # Take care of edge case inputs, such as more than one character and integer inputs
+    elif len(guess) != 1:
+        print("Please enter a single letter to continue\n")
+    elif guess.isdigit():
+        print("Please enter a letter to continue\n")
+    elif guess in word and len(guess) == 1 and max_incorrect_guessess != 0:
+        print(Fore.GREEN + 'Good guess!')
+        print(Style.RESET_ALL)
+        letters_guessed.append(guess)
+        display_word = ''
+        for i, letter in enumerate(word):
+            if letter in letters_guessed:
+                display_word += letter
+            else:
+                display_word += '_'
         appears = word.count(guess)
-        print('Letter is in word', appears, 'times')
-        letters_guessed.append(letters_guessed)
-        letters_guessed = ','.join(guess * appears)
-        print(letters_guessed)
         remaining_letters = len(word) - len(letters_guessed)
-        print('remaining letters', remaining_letters)
-          
-            
+        if '_' not in display_word:
+            print(Fore.GREEN + f'Congratulations! You guessed the word: {word}')
+            print(Style.RESET_ALL)
+            break
+        # print('remaining letters', remaining_letters)
     elif guess not in word and len(guess) == 1 and max_incorrect_guessess != 0:
-        print(Fore.RED + 'Oops! That letter is not in the word')
-        print(HANGMANPICS[incorrect_guesses])
-        print(Style.RESET_ALL)   
+        print(Fore.RED + f'Oops! The letter ({guess}) is not in the word')
         incorrect_guesses += 1
         max_incorrect_guessess -= 1
-        print("Guesses left: ", max_incorrect_guessess)
+        incorrect_list.append(guess)
+        print("Guesses left: ", max_incorrect_guessess + 1)
+        print(scaffold[incorrect_guesses])
+        print(Style.RESET_ALL)
     else:
+        print(Fore.RED + scaffold[6])
         print("You have no more guesses available. GAME OVER!")
         print(Fore.CYAN + f'The word was: {word}')
-        print(Style.RESET_ALL)  
+        print(Style.RESET_ALL)
         break
-        
-    #TODO:
-    # show alert when letter has been chosen before, don't count towards counter
-    # limit nums of chars in guess - print("Please enter a single character to continue\n")
-    # show the player their current progress in the UI "lines"
-
-
-
